@@ -51,9 +51,7 @@
 		public function accessTokenFromRemote()
 		{
 			$client = new Client([
-				// Base URI is used with relative requests
 				'base_uri' => 'https://www.googleapis.com/oauth2/v4/token',
-					// You can set any number of default request options.
 					'timeout'  => 2.0,
 			]);
 
@@ -70,7 +68,6 @@
 			return $response->getBody();
 		}
 
-
 		public function accessTokenFromLocal()
 		{
 			$access_token_json = file_get_contents('constants/access_token.json');
@@ -85,9 +82,7 @@
 			$refresh_token = $access_token->refresh_token;
 
 			$client = new Client([
-				// Base URI is used with relative requests
 				'base_uri' => 'https://www.googleapis.com/oauth2/v4/token',
-					// You can set any number of default request options.
 					'timeout'  => 2.0,
 			]);
 
@@ -109,7 +104,6 @@
 			$refreshed_token_obj = self::refresh();
 			$bearer = $refreshed_token_obj->access_token;
 			return $bearer;
-			
 		}
 
 	}

@@ -15,6 +15,7 @@
 			$this->redirect_uri = $this->client_secret->installed->redirect_uris[0];
 			$this->uri = self::uri();
 			$this->authorization_code = self::authorizationCode();
+			$this->access_token = self::accessTokenFromLocal();
 		}
 
 		public function clientSecret()
@@ -47,7 +48,7 @@
 		}
 
 
-		public function accessToken()
+		public function accessTokenFromRemote()
 		{
 			$client = new Client([
 				// Base URI is used with relative requests
@@ -69,31 +70,46 @@
 			return $response->getBody();
 		}
 
-		public function refresh()
+
+		public function accessTokenFromLocal()
 		{
-			$secret = file_get_contents('constants/client_secret.json');
-			$secret_array = json_decode($secret);
-
-			$token = file_get_contents('constants/access_token.json');
-			$token_array = json_decode($token);
-
-			$client_id = $secret_array->installed->client_id;
-			$client_secret = $secret_array->installed->client_secret;
-			$refresh_token = $token_array->refresh_token;
-
-			$str_refresh_token = '"refresh_token='.$refresh_token.'"';
-			$str_client_id = '"client_id='.$client_id.'"';
-			$str_client_secret = '"client_secret='.$client_secret.'"';
-			$str_grant_type = '"grant_type=refresh_token"';
-			$refresh_url = 'https://www.googleapis.com/oauth2/v4/token';
-
-			$str = 'curl --data '.$str_refresh_token.' --data '.$str_client_id.' --data '.$str_client_secret.' --data '.$str_grant_type.' '.$refresh_url;
-
-			return $token_json = shell_exec($str);
+			$access_token_json = file_get_contents('constants/access_token.json');
+			$access_token_obj = json_decode($access_token_json);
+			return $access_token_obj;
 		}
 
+		public function refresh()
+		{
+			$secret = $this->client_secret;
+			$access_token = self::accessTokenFromLocal();
+			$refresh_token = $access_token->refresh_token;
+
+			$client = new Client([
+				// Base URI is used with relative requests
+				'base_uri' => 'https://www.googleapis.com/oauth2/v4/token',
+					// You can set any number of default request options.
+					'timeout'  => 2.0,
+			]);
+
+			$response = $client->request('POST', '', [
+				'form_params' => [
+					'refresh_token' => $refresh_token,
+						'client_id' => $this->client_id,
+						'client_secret' => $this->client_secret_str,
+						'grant_type' => 'refresh_token',
+				]
+			]);
+			$refreshed_token_json = $response->getBody();
+			$refreshed_token_obj = json_decode($refreshed_token_json);
+			return $refreshed_token_obj;
+		}
+
+		public function bearer()
+		{
+			$refreshed_token_obj = self::refresh();
+			$bearer = $refreshed_token_obj->access_token;
+			return $bearer;
+			
+		}
 
 	}
-
-
-	

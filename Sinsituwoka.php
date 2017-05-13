@@ -36,7 +36,7 @@
 			$scope_file = 'constants/scope';
 			try {
 				if (file_exists($scope_file)) {
-					$scope = rtrim(file_get_contents());
+					$scope = rtrim(file_get_contents($scope_file));
 					$query = http_build_query(
 						[
 							'response_type' => 'code',

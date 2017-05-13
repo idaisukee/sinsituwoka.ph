@@ -33,18 +33,26 @@
 
 		public function uri()
 		{
-			$scope = rtrim(file_get_contents('constants/scope'));
-
-			$query = http_build_query(
-				[
-					'response_type' => 'code',
-						'client_id' => $this->client_id,
-						'redirect_uri' => $this->redirect_uri,
-						'scope' => $scope,
-						'access_type' => 'offline',
-				]);
-			$uri = 'https://accounts.google.com/o/oauth2/v2/auth?'.$query;
-			return $uri;
+			$scope_file = 'constants/scope';
+			try {
+				if (file_exists($scope_file)) {
+					$scope = rtrim(file_get_contents());
+					$query = http_build_query(
+						[
+							'response_type' => 'code',
+								'client_id' => $this->client_id,
+								'redirect_uri' => $this->redirect_uri,
+								'scope' => $scope,
+								'access_type' => 'offline',
+						]);
+					$uri = 'https://accounts.google.com/o/oauth2/v2/auth?'.$query;
+					return $uri;
+				} else {
+					throw new \Exception('Error: constants/scope doesn\'t exist.');
+				}
+			} catch (\Exception $e) {
+				echo $e->getMessage(), "\n";
+			}
 		}
 
 

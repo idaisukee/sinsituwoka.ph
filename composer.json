@@ -1,4 +1,5 @@
 {
+	"name": "idaisukee/Sinsituwoka.php",
 	"version": 0.0.0,
 	"require": {
 		"guzzlehttp/guzzle": "^6.2"
